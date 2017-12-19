@@ -1,6 +1,6 @@
 import pygame
 import time
-import bot
+from bot import *
 import random
 from math import sqrt, cos, sin, pi
 import matplotlib.pyplot as plt
@@ -13,10 +13,12 @@ w.fill((255, 255, 255))
 pygame.display.flip()
 time0 = time.clock()
 
-bot = bot.bot(100, 100)
+bot = bot(400, 400)
 
 def update(delta):
     event = pygame.event.poll()
+    if event.type == pygame.MOUSEBUTTONDOWN:
+        bot.eye.isInSight(pygame.mouse.get_pos())
 
 
 def draw():
