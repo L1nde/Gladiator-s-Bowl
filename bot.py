@@ -1,5 +1,7 @@
 import pygame
 from math import pi, atan2, radians, cos, sin
+
+from keras import Sequential
 from scipy.spatial import distance
 from theano.gradient import np
 
@@ -8,6 +10,7 @@ class bot:
     def __init__(self, x, y, entityManager):
         self.x = x
         self.y = y
+        self.hp = 1
         self.direction = 0  # radians
         self.cooldown = 2 # seconds
         self.currentCooldown = 0
@@ -15,8 +18,10 @@ class bot:
         self.radius = 13
         self.em = entityManager
 
+
     def update(self, delta):
-        pass
+        if self.hp <= 0:
+            self.em.killBot(self)
 
     def draw(self, w):
         pygame.draw.circle(w, (0, 0, 255), (self.x, self.y), self.radius)

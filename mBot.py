@@ -9,6 +9,7 @@ class mBot(bot):
                      eye(200, radians(70), radians(120), self), eye(200, radians(70), radians(-120), self)]
 
     def update(self, delta):
+        super().update(delta)
         self.reload(delta)
         self.shoot()
 
@@ -21,3 +22,6 @@ class mBot(bot):
     def drawEyes(self, w):
         for eye in self.eyes:
             eye.draw(w)
+
+    def createModel(self):
+        self.model = Sequential()
