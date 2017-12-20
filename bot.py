@@ -103,7 +103,8 @@ class eye:
 
     def draw(self, w):
         dir = self.bot.direction + self.direction
-        pygame.draw.line(w, (0, 0, 0), (cos(dir + self.spread / 2) * self.range + self.bot.x,
+        col = (randint(0, 200), randint(0, 200), randint(0, 200))
+        pygame.draw.line(w, col, (cos(dir + self.spread / 2) * self.range + self.bot.x,
                                         sin(dir + self.spread / 2) * self.range + self.bot.y), self.bot.getPos())
-        pygame.draw.line(w, (0, 0, 0), (cos(dir - self.spread / 2) * self.range + self.bot.x,
-                                        sin(dir - self.spread / 2) * self.range + self.bot.y), self.bot.getPos())
+        pygame.draw.line(w, col, (cos(dir - self.spread / 2) * self.range + self.bot.x,
+                                  sin(dir - self.spread / 2) * self.range + self.bot.y), self.bot.getPos())

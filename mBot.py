@@ -11,8 +11,9 @@ class mBot(bot):
     def __init__(self, x, y, entityManager):
         super().__init__(x, y, entityManager)
 
-        self.eyes = [eye(200, radians(30), radians(12), self), eye(200, radians(30), radians(-12), self),
-                     eye(200, radians(50), radians(50), self), eye(200, radians(50), radians(-50), self)]
+        self.eyes = [eye(800, radians(3), radians(0), self), eye(400, radians(15), radians(7), self),
+                     eye(400, radians(15), radians(-7), self), eye(200, radians(130), radians(-90), self),
+                     eye(200, radians(130), radians(90), self)]
         self.brain = brain()
         self.selfDestructTime = 3
         self.currentSelfDestructTime = 3
@@ -48,7 +49,7 @@ class mBot(bot):
 
         self.x = newX
         self.y = newY
-
+        self.currentSelfDestructTime -= delta / 10
         self.reload(delta)
         if (outputs[2] > 0):
             self.shoot()
@@ -73,7 +74,7 @@ class mBot(bot):
             self.brain.mutate(bot1.brain.model, bot2.brain.model)
 
     def draw(self, w):
-        # self.drawEyes(w)
+        ##self.drawEyes(w)
         pygame.draw.circle(w, (0, 0, 255), (int(self.x), int(self.y)), 13)
         pygame.draw.circle(w, (255, 0, 0),
                            (int(self.x + 8 * cos(self.direction)), int(self.y + 8 * sin(self.direction))), 3)
@@ -84,8 +85,12 @@ class mBot(bot):
 
     def getInputs(self):
         inputs = []
-        for eye in self.eyes:
-            inputs.append(eye.getVisionB(self.em.bots, self.em.bulletPool))
+        for i in range(len(self.eyes)):
+            eye = self.eyes[i]
+            if (i < 4):
+                inputs.append(eye.getVisionE(self.em.bots, self.em.bulletPool))
+            else:
+                inputs.append(eye.getVisionB(self.em.bots, self.em.bulletPool))
 
         inputs.append(sigmoid(self.getDistanceFromCentre()) - 0.25)
         return inputs
