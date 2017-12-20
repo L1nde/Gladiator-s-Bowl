@@ -14,13 +14,13 @@ class mBot(bot):
         self.eyes = [eye(800, radians(3), radians(0), self), eye(400, radians(30), radians(16), self),
                      eye(400, radians(30), radians(-16), self), ]
         self.brain = brain()
-        self.selfDestructTime = 3
-        self.currentSelfDestructTime = 3
+        self.selfDestructTime = 10
+        self.currentSelfDestructTime = 10
 
 
     def update(self, delta):
         super().update(delta)
-        outputs = self.brain.getOutputs(self.getInputs())
+        outputs = self.brain.getOutputs(self.getInputs(delta))
         self.speed = outputs[0] * 100
         if (abs(self.speed) < 50):
             self.dealWithBadBehaviour(delta)
@@ -48,7 +48,7 @@ class mBot(bot):
 
         self.x = newX
         self.y = newY
-        self.currentSelfDestructTime -= delta / 10
+        self.currentSelfDestructTime -= delta / 30
         self.reload(delta)
         if (outputs[2] > 0):
             self.shoot()
@@ -82,10 +82,14 @@ class mBot(bot):
         for eye in self.eyes:
             eye.draw(w)
 
-    def getInputs(self):
+    def getInputs(self, delta):
         inputs = []
         for i in self.eyes:
-            inputs.append(i.canSeeEnemy(self.em.bots))
+            sight = i.canSeeEnemy(self.em.bots)
+            if (sight == 1):
+                self.score += delta
+            inputs.append(sight)
+
         inputs.append(sigmoid(self.getDistanceFromCentre() / 500) * 2 - 1)
 
         if (self.currentCooldown <= 0):

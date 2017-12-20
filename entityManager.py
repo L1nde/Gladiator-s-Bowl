@@ -9,13 +9,20 @@ class entityManager:
         self.maxBotCount = 10
         self.bots = [[], []]
         self.createMBots()
+
+        # Statistics
         self.bulletsFired = 0
         self.bulletsHit = 0
         self.firedHitBulletHistory = []
 
+        self.scoreRecordTime = 10
+        self.timeTillRecordTime = self.scoreRecordTime
+        self.scores = [[], []]
+
     def update(self, delta):
         self.updateBots(delta)
         self.updateBullets(delta)
+        self.dealWithScores(delta)
 
 
     def draw(self, w):
@@ -73,3 +80,15 @@ class entityManager:
         mbots = self.bots[0]
         sortedMBots = sorted(mbots, key=lambda mBot: mBot.score, reverse=True)
         return sortedMBots[0], sortedMBots[1]
+
+    def dealWithScores(self, delta):
+        self.timeTillRecordTime -= delta
+        if (self.timeTillRecordTime < 0):
+            self.scores[0].append(self.getAvgMBotScores())
+            self.timeTillRecordTime = self.scoreRecordTime
+
+    def getAvgMBotScores(self):
+        s = 0
+        for bot in self.bots[0]:
+            s += bot.score
+        return s / len(self.bots[0])

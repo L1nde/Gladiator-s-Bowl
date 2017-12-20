@@ -38,6 +38,7 @@ class bullet:
                 if distance.euclidean((self.x, self.y), bot.getPos()) < bot.radius + 3:
                     if bot != self.bot:
                         bot.hp -= 1
+                        bot.score -= 2
                         self.bot.em.bulletsHit += 1
                         self.bot.score += 10
                         self.dead = True
