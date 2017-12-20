@@ -1,7 +1,6 @@
 import pygame
 from math import pi, atan2, radians, cos, sin
 
-from keras import Sequential
 from scipy.spatial import distance
 from theano.gradient import np
 
@@ -13,6 +12,7 @@ class bot:
         self.hp = 1
         self.direction = 0  # radians
         self.cooldown = 2 # seconds
+        self.speed = 50
         self.currentCooldown = 0
         self.score = 0
         self.radius = 13
@@ -41,8 +41,6 @@ class bot:
     def getDirection(self):
         return self.direction
 
-
-
 class eye:
     def __init__(self, range, spread, direction, bot):
         self.range = range
@@ -51,6 +49,14 @@ class eye:
         self.bot = bot
 
     # returns if eye can see given point
+    def canSeeEnemy(self, bots):
+        for bot in bots:
+            if (self.bot != bot):
+                if (self.isInSight(bot.getPos())):
+                    return 1
+        return 0
+
+
     def isInSight(self, targetPos):
         if self.isInRange(targetPos):
             dir = self.bot.direction + self.direction
@@ -58,8 +64,8 @@ class eye:
             edgeVector2 = (sin(dir - self.spread / 2), -cos(dir - self.spread / 2))
             targetVector = np.subtract(targetPos, self.bot.getPos())
             if np.dot(targetVector, edgeVector2) < 0 and np.dot(targetVector, edgeVector1) > 0:
-                return 1
-        return 0
+                return True
+        return False
 
     def isInRange(self, targetPos):
         if self.range > distance.euclidean(self.bot.getPos(), targetPos):
@@ -73,10 +79,3 @@ class eye:
         pygame.draw.line(w, (0, 0, 0), (cos(dir - self.spread / 2) * self.range + self.bot.x,
                                         sin(dir - self.spread / 2) * self.range + self.bot.y), self.bot.getPos())
 
-
-def removeExtraCircles(dir):
-    if dir < -pi:
-        dir += 2 * pi
-    elif dir > pi:
-        dir -= 2 * pi
-    return dir

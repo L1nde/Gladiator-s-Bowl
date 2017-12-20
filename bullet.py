@@ -8,8 +8,7 @@ class bullet:
 
     def __init__(self):
         self.dead = True
-        self.speed = 500
-
+        self.speed = 2000
 
     def init(self, bot):
         self.xSpeed = cos(bot.direction) * self.speed
@@ -28,7 +27,7 @@ class bullet:
 
 
     def draw(self, w):
-        pygame.draw.circle(w, (0, 0, 0), (round(self.x), round(self.y)), 3)
+        pygame.draw.circle(w, (0, 0, 0), (int(self.x), int(self.y)), 3)
 
 
     #might need optimizing
@@ -37,6 +36,7 @@ class bullet:
             if distance.euclidean((self.x, self.y), bot.getPos()) < bot.radius + 3:
                 if bot != self.bot:
                     bot.hp -= 1
+                    self.bot.score += 1
                     self.dead = True
 
 

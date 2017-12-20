@@ -15,6 +15,7 @@ time0 = time.clock()
 em = entityManager()
 
 def update(delta):
+    print(1/delta)
     event = pygame.event.poll()
     em.update(delta)
 
