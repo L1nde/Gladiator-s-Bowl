@@ -50,10 +50,11 @@ class eye:
 
     # returns if eye can see given point
     def canSeeEnemy(self, bots):
-        for bot in bots:
-            if (self.bot != bot):
-                if (self.isInSight(bot.getPos())):
-                    return 1
+        for botSet in bots:
+            for bot in botSet:
+                if (self.bot != bot):
+                    if (self.isInSight(bot.getPos())):
+                        return 1
         return 0
 
 

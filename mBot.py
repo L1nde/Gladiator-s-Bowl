@@ -1,3 +1,4 @@
+import math
 from keras import Sequential, Input
 from keras.layers import Dense, Activation, Flatten
 
@@ -39,8 +40,6 @@ class mBot(bot):
         if (outputs[2] > 0.5):
             self.shoot()
 
-
-
     def draw(self, w):
         #self.drawEyes(w)
         pygame.draw.circle(w, (0, 0, 255), (int(self.x), int(self.y)), 13)
@@ -55,14 +54,19 @@ class mBot(bot):
         inputs = []
         for eye in self.eyes:
             inputs.append(eye.canSeeEnemy(self.em.bots))
+
+        inputs.append(sigmoid(self.getDistanceFromCentre()) - 0.25)
         return inputs
+
+    def getDistanceFromCentre(self):
+        return distance.euclidean(self.getPos(), (500,400))
 
 #I have no idea what I'm doing
 class brain:
 
     def __init__(self):
         self.model = Sequential()
-        self.x1 = Dense(10, input_dim=1)
+        self.x1 = Dense(12, input_dim=1)
         self.model.add(self.x1)
         self.x2 = Dense(3)
         self.model.add(self.x2)
@@ -73,6 +77,7 @@ class brain:
         return np.sum(self.model.predict(inputs), axis=0)
 
 
-
+def sigmoid(x):
+  return 1 / (1 + math.exp(-x))
 
 

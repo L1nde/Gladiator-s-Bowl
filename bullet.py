@@ -32,12 +32,13 @@ class bullet:
 
     #might need optimizing
     def checkCollision(self, bots):
-        for bot in bots:
-            if distance.euclidean((self.x, self.y), bot.getPos()) < bot.radius + 3:
-                if bot != self.bot:
-                    bot.hp -= 1
-                    self.bot.score += 1
-                    self.dead = True
+        for botSet in bots:
+            for bot in botSet:
+                if distance.euclidean((self.x, self.y), bot.getPos()) < bot.radius + 3:
+                    if bot != self.bot:
+                        bot.hp -= 1
+                        self.bot.score += 1
+                        self.dead = True
 
 
 
