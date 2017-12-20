@@ -1,5 +1,3 @@
-from random import randint
-
 from bullet import bullet
 from mBot import *
 
@@ -11,10 +9,14 @@ class entityManager:
         self.maxBotCount = 10
         self.bots = [[], []]
         self.createMBots()
+        self.bulletsFired = 0
+        self.bulletsHit = 0
+        self.firedHitBulletHistory = []
 
     def update(self, delta):
         self.updateBots(delta)
         self.updateBullets(delta)
+
 
     def draw(self, w):
         self.drawBots(w)
@@ -28,6 +30,11 @@ class entityManager:
 
         b.init(shooter)
         self.bulletPool.append(b)
+        self.bulletsFired += 1
+        if (self.bulletsFired % 100 == 0):
+            self.firedHitBulletHistory.append([self.bulletsFired, self.bulletsHit])
+            self.bulletsHit = 0
+
 
     def createMBots(self):
         while len(self.bots[0]) <= self.maxBotCount:
@@ -65,5 +72,4 @@ class entityManager:
     def getTwoRandomHighScoreMBots(self):
         mbots = self.bots[0]
         sortedMBots = sorted(mbots, key=lambda mBot: mBot.score, reverse=True)
-        r = randint(0, 5)
-        return sortedMBots[r], sortedMBots[r + 1]
+        return sortedMBots[0], sortedMBots[1]

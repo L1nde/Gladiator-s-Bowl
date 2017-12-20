@@ -12,7 +12,7 @@ class bot:
         self.y = y
         self.hp = 1
         self.direction = 0  # radians
-        self.cooldown = 0.2  # seconds
+        self.cooldown = 1  # seconds
         self.speed = 0
         self.currentCooldown = 0
         self.score = 0

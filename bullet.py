@@ -7,7 +7,7 @@ from scipy.spatial import distance
 class bullet:
     def __init__(self):
         self.dead = True
-        self.speed = 8000
+        self.speed = 800
 
     def init(self, bot):
         self.xSpeed = cos(bot.direction) * self.speed
@@ -22,6 +22,7 @@ class bullet:
         self.y += self.ySpeed * delta
         if (self.x <= 0 or self.x >= 1000 or self.y >= 800 or self.y <= 0):
             self.dead = True
+
         self.checkCollision(bots)
 
     def draw(self, w):
@@ -37,5 +38,6 @@ class bullet:
                 if distance.euclidean((self.x, self.y), bot.getPos()) < bot.radius + 3:
                     if bot != self.bot:
                         bot.hp -= 1
-                        self.bot.score += 1
+                        self.bot.em.bulletsHit += 1
+                        self.bot.score += 10
                         self.dead = True

@@ -11,9 +11,8 @@ class mBot(bot):
     def __init__(self, x, y, entityManager):
         super().__init__(x, y, entityManager)
 
-        self.eyes = [eye(800, radians(3), radians(0), self), eye(400, radians(15), radians(7), self),
-                     eye(400, radians(15), radians(-7), self), eye(200, radians(130), radians(-90), self),
-                     eye(200, radians(130), radians(90), self)]
+        self.eyes = [eye(800, radians(3), radians(0), self), eye(400, radians(30), radians(16), self),
+                     eye(400, radians(30), radians(-16), self), ]
         self.brain = brain()
         self.selfDestructTime = 3
         self.currentSelfDestructTime = 3
@@ -22,11 +21,11 @@ class mBot(bot):
     def update(self, delta):
         super().update(delta)
         outputs = self.brain.getOutputs(self.getInputs())
-        self.speed = outputs[0] * 1000
+        self.speed = outputs[0] * 100
         if (abs(self.speed) < 50):
             self.dealWithBadBehaviour(delta)
 
-        self.direction += outputs[1] * delta * 100
+        self.direction += outputs[1] * delta * 10
 
         self.xSpeed = self.speed * cos(self.direction)
         self.ySpeed = self.speed * sin(self.direction)
@@ -74,7 +73,7 @@ class mBot(bot):
             self.brain.mutate(bot1.brain.model, bot2.brain.model)
 
     def draw(self, w):
-        ##self.drawEyes(w)
+        # self.drawEyes(w)
         pygame.draw.circle(w, (0, 0, 255), (int(self.x), int(self.y)), 13)
         pygame.draw.circle(w, (255, 0, 0),
                            (int(self.x + 8 * cos(self.direction)), int(self.y + 8 * sin(self.direction))), 3)
@@ -85,14 +84,14 @@ class mBot(bot):
 
     def getInputs(self):
         inputs = []
-        for i in range(len(self.eyes)):
-            eye = self.eyes[i]
-            if (i < 4):
-                inputs.append(eye.getVisionE(self.em.bots, self.em.bulletPool))
-            else:
-                inputs.append(eye.getVisionB(self.em.bots, self.em.bulletPool))
+        for i in self.eyes:
+            inputs.append(i.canSeeEnemy(self.em.bots))
+        inputs.append(sigmoid(self.getDistanceFromCentre() / 500) * 2 - 1)
 
-        inputs.append(sigmoid(self.getDistanceFromCentre()) - 0.25)
+        if (self.currentCooldown <= 0):
+            inputs.append(1)
+        else:
+            inputs.append(0)
         return inputs
 
     def getDistanceFromCentre(self):
