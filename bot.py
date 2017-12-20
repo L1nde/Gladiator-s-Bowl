@@ -1,6 +1,7 @@
-import pygame
-from math import pi, atan2, radians, cos, sin
+from math import radians, cos, sin
+from random import randint
 
+import pygame
 from scipy.spatial import distance
 from theano.gradient import np
 
@@ -11,13 +12,21 @@ class bot:
         self.y = y
         self.hp = 1
         self.direction = 0  # radians
-        self.cooldown = 2 # seconds
-        self.speed = 50
+        self.cooldown = 0.2  # seconds
+        self.speed = 0
         self.currentCooldown = 0
         self.score = 0
         self.radius = 13
         self.em = entityManager
 
+    def reset(self):
+        self.x = randint(100, 900)
+        self.y = randint(100, 700)
+        self.hp = 1
+        self.direction = radians(randint(-180, 180))
+        self.speed = 0
+        self.currentCooldown = 0
+        self.score = 0
 
     def update(self, delta):
         if self.hp <= 0:
@@ -41,12 +50,25 @@ class bot:
     def getDirection(self):
         return self.direction
 
+
 class eye:
     def __init__(self, range, spread, direction, bot):
         self.range = range
         self.spread = spread
         self.direction = direction
         self.bot = bot
+
+    # Focuses on bullets
+    def getVisionB(self, bots, bullets):
+        if (self.canSeeEnemyBullet(bullets)):
+            return -1
+        return self.canSeeEnemy(bots)
+
+    # Focuses on enemies
+    def getVisionE(self, bots, bullets):
+        if (self.canSeeEnemy(bots)):
+            return 1
+        return self.canSeeEnemyBullet(bullets)
 
     # returns if eye can see given point
     def canSeeEnemy(self, bots):
@@ -57,6 +79,12 @@ class eye:
                         return 1
         return 0
 
+    def canSeeEnemyBullet(self, bullets):
+        for b in bullets:
+            if (b.bot != self.bot):
+                if (self.isInSight(b.getPos())):
+                    return -1
+        return 0
 
     def isInSight(self, targetPos):
         if self.isInRange(targetPos):
@@ -79,4 +107,3 @@ class eye:
                                         sin(dir + self.spread / 2) * self.range + self.bot.y), self.bot.getPos())
         pygame.draw.line(w, (0, 0, 0), (cos(dir - self.spread / 2) * self.range + self.bot.x,
                                         sin(dir - self.spread / 2) * self.range + self.bot.y), self.bot.getPos())
-

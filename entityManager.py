@@ -1,14 +1,16 @@
-from bullet import bullet
-from mBot import *
 from random import randint
 
-class entityManager:
+from bullet import bullet
+from mBot import *
 
+
+class entityManager:
     def __init__(self):
         self.bulletPool = []
         self.deadBulletPool = []
         self.maxBotCount = 10
-        self.bots = [[],[]]
+        self.bots = [[], []]
+        self.createMBots()
 
     def update(self, delta):
         self.updateBots(delta)
@@ -29,7 +31,7 @@ class entityManager:
 
     def createMBots(self):
         while len(self.bots[0]) <= self.maxBotCount:
-            self.bots[0].append(mBot(randint(100,900), randint(100,700), self))
+            self.bots[0].append(mBot(randint(100, 900), randint(100, 700), self))
 
     def updateBullets(self, delta):
         for bullet in self.bulletPool:
@@ -40,7 +42,6 @@ class entityManager:
             bullet.update(delta, self.bots)
 
     def updateBots(self, delta):
-        self.createMBots()
         for i in self.bots:
             for bot in i:
                 bot.update(delta)
@@ -54,7 +55,15 @@ class entityManager:
             for bot in i:
                 bot.draw(w)
 
+    def createNewMBot(self, bot):
+        bot.reset()
+
     def killBot(self, bot):
-        for i in range(len(self.bots)):
-            if bot in self.bots[i]:
-                self.bots[i].remove(bot)
+        if (bot in self.bots[0]):
+            self.createNewMBot(bot)
+
+    def getTwoRandomHighScoreMBots(self):
+        mbots = self.bots[0]
+        sortedMBots = sorted(mbots, key=lambda mBot: mBot.score, reverse=True)
+        r = randint(0, 5)
+        return sortedMBots[r], sortedMBots[r + 1]

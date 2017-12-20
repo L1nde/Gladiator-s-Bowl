@@ -1,14 +1,13 @@
-import pygame
 from math import cos, sin
 
+import pygame
 from scipy.spatial import distance
 
 
 class bullet:
-
     def __init__(self):
         self.dead = True
-        self.speed = 2000
+        self.speed = 8000
 
     def init(self, bot):
         self.xSpeed = cos(bot.direction) * self.speed
@@ -25,12 +24,13 @@ class bullet:
             self.dead = True
         self.checkCollision(bots)
 
-
     def draw(self, w):
         pygame.draw.circle(w, (0, 0, 0), (int(self.x), int(self.y)), 3)
 
+    def getPos(self):
+        return self.x, self.y
 
-    #might need optimizing
+    # might need optimizing
     def checkCollision(self, bots):
         for botSet in bots:
             for bot in botSet:
@@ -39,8 +39,3 @@ class bullet:
                         bot.hp -= 1
                         self.bot.score += 1
                         self.dead = True
-
-
-
-
-
