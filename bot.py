@@ -10,7 +10,7 @@ class bot:
     def __init__(self, x, y, entityManager):
         self.x = x
         self.y = y
-        self.hp = 3
+        self.hp = 1
         self.direction = 0  # radians
         self.cooldown = 1  # seconds
         self.speed = 0
@@ -22,7 +22,7 @@ class bot:
     def reset(self):
         self.x = randint(100, 900)
         self.y = randint(100, 700)
-        self.hp = 3
+        self.hp = 1
         self.direction = radians(randint(-180, 180))
         self.speed = 0
         self.currentCooldown = 0

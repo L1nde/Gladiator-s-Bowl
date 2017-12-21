@@ -1,14 +1,18 @@
 from bullet import bullet
 from mBot import *
-
+from lBot import *
+from player import *
+from random import randint
 
 class entityManager:
     def __init__(self):
         self.bulletPool = []
         self.deadBulletPool = []
         self.maxBotCount = 10
-        self.bots = [[], []]
+        self.bots = [[], [], []]
         self.createMBots()
+        self.createLBots()
+        # self.createPlayer()
 
         # Statistics
         self.bulletsFired = 0
@@ -47,6 +51,13 @@ class entityManager:
         while len(self.bots[0]) <= self.maxBotCount:
             self.bots[0].append(mBot(randint(100, 900), randint(100, 700), self))
 
+    def createLBots(self):
+        while len(self.bots[1]) <= self.maxBotCount:
+            self.bots[1].append(lBot(randint(100,900), randint(100,700), self))
+
+    def createPlayer(self):
+        self.bots[2].append(player(randint(100,900), randint(100,700), self))
+
     def updateBullets(self, delta):
         for bullet in self.bulletPool:
             if (bullet.dead):
@@ -75,11 +86,21 @@ class entityManager:
     def killBot(self, bot):
         if (bot in self.bots[0]):
             self.createNewMBot(bot)
+        if (bot in self.bots[1]):
+            bot.reset()
+        if (bot in self.bots[2]):
+            self.createPlayer()
+            self.bots[2].remove(bot)
 
     def getTwoRandomHighScoreMBots(self):
         mbots = self.bots[0]
         sortedMBots = sorted(mbots, key=lambda mBot: mBot.score, reverse=True)
         return sortedMBots[0], sortedMBots[1]
+
+    def getTwoRandomHighScoreLBots(self):
+        lbots = self.bots[1]
+        sortedLBots = sorted(lbots, key=lambda lBot: lBot.score, reverse=True)
+        return sortedLBots[0], sortedLBots[1]
 
     def dealWithScores(self, delta):
         self.timeTillRecordTime -= delta
