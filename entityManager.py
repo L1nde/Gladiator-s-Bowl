@@ -3,6 +3,8 @@ from lBot import *
 from mBot import *
 from player import *
 
+from keras.models import load_model
+
 
 class entityManager:
     def __init__(self):
@@ -146,3 +148,27 @@ class entityManager:
         for bot in self.bots[0]:
             s += bot.score
         return s / len(self.bots[0])
+
+    def saveModels(self):
+        lbot1, lbot2 = self.getTwoRandomHighScoreLBots()
+        lbot1.brain.model.save("lBot1Model.h5")
+        lbot2.brain.model.save("lBot2Model.h5")
+
+        mbot1, mbot2 = self.getTwoRandomHighScoreMBots()
+        mbot1.brain.model.save("mBot1Model.h5")
+        mbot2.brain.model.save("mBot2Model.h5")
+
+    def loadModels(self):
+        lmodel1 = load_model("lBot1Model.h5")
+        lmodel2 = load_model("lBot2Model.h5")
+
+        mmodel1 = load_model("mBot1Model.h5")
+        mmodel2 = load_model("mBot2Model.h5")
+
+        for lbot in self.bots[1]:
+            lbot.brain.model = choice([lmodel1, lmodel2])
+
+        for mbot in self.bots[0]:
+            mbot.brain.model = choice([mmodel1, mmodel2])
+
+

@@ -58,15 +58,18 @@ class lBot(bot):
             eye.draw(w)
 
     def getInput(self):
-        inputs = [self.currentCooldown]
+        inputs = [self.x, self.y, self.currentCooldown]
         for eye in self.eyes:
-            inputs.append(eye.canSeeEnemy(self.em.bots))
+            sight = eye.canSeeEnemy(self.em.bots)
+            inputs.append(sight)
+            self.score += sight/20
+            inputs.append(eye.canSeeEnemyBullet(self.em.bulletPool))
         return inputs
 
 class Brain:
     def __init__(self):
         self.model = Sequential()
-        self.model.add(Dense(12, input_dim=4, activation="tanh", kernel_initializer=initializers.RandomUniform(minval=-1, maxval=1, seed=None)))
+        self.model.add(Dense(12, input_dim=9, activation="tanh", kernel_initializer=initializers.RandomUniform(minval=-1, maxval=1, seed=None)))
         self.model.add(Dense(20, activation="tanh", kernel_initializer=initializers.RandomUniform(minval=-1, maxval=1, seed=None)))
         self.model.add(Dense(3, activation="tanh", kernel_initializer=initializers.RandomUniform(minval=-1, maxval=1, seed=None)))
         self.model.compile(optimizer='sgd', loss='mean_squared_error')
@@ -84,7 +87,7 @@ class Brain:
                 w = []
                 for k in range(len(b1weights[0])):
                     r = random()
-                    if r > 0.5:
+                    if r > 0.8:
                         w.append(randint(-1000, 1000)/1000)
                     else:
                         w.append(choice([b1weights[j][k], b2weights[j][k]]))

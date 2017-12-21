@@ -19,6 +19,8 @@ class ui():
         self.buttons.append(button(1010, 130, 190, 25, "Show lbot avg scores", self.drawLBotScorePlot))
         self.buttons.append(button(1010, 200, 190, 25, "Show eyes", self.drawEyes))
         self.buttons.append(button(1010, 235, 190, 25, "Spawn/delete player", self.spawnPlayer))
+        self.buttons.append(button(1010, 340, 190, 25, "Save models and weights", self.em.saveModels))
+        self.buttons.append(button(1010, 375, 190, 25, "Load models and weights", self.em.loadModels))
         self.eyes = False
         self.player = False
 
@@ -61,8 +63,8 @@ class ui():
         for i in range(len(yValues)):
             xValues.append(i)
         plt.plot(xValues, yValues)
-        plt.xlabel('Scores', fontsize=12)
-        plt.ylabel('Bots', fontsize=12)
+        plt.xlabel('Bots', fontsize=12)
+        plt.ylabel('Scores', fontsize=12)
         plt.show()
 
     def drawHitPlot(self):
