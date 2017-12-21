@@ -11,8 +11,8 @@ class mBot(bot):
     def __init__(self, x, y, entityManager):
         super().__init__(x, y, entityManager)
 
-        self.eyes = [eye(200, radians(20), radians(7), self), eye(200, radians(20), radians(-7), self),
-                     eye(100, radians(90), radians(60), self), eye(100, radians(90), radians(-60), self)]
+        self.eyes = [eye(200, radians(50), radians(20), self), eye(200, radians(50), radians(-20), self),
+                     eye(200, radians(50), radians(60), self), eye(200, radians(50), radians(-60), self)]
         self.brain = brain()
         self.selfDestructTime = 10
         self.currentSelfDestructTime = 10
@@ -21,10 +21,10 @@ class mBot(bot):
     def update(self, delta):
         super().update(delta)
         outputs = self.brain.getOutputs(self.getInputs(delta))[0]
-        self.speed = outputs[0] * 200
+        self.speed = outputs[0] * 50
         if (abs(self.speed) < 50):
             self.dealWithBadBehaviour(delta)
-        self.direction += outputs[1] * delta * 3
+        self.direction += outputs[1] * delta
 
         self.xSpeed = self.speed * cos(self.direction)
         self.ySpeed = self.speed * sin(self.direction)
@@ -98,7 +98,7 @@ class brain:
     def __init__(self):
         self.model = Sequential()
         self.model.add(
-            Dense(8, activation="softmax", input_dim=6,
+            Dense(8, activation="tanh", input_dim=6,
                   kernel_initializer=initializers.RandomUniform(minval=-1, maxval=1, seed=None)))
         self.model.add(
             Dense(3, activation="tanh", kernel_initializer=initializers.RandomUniform(minval=-1, maxval=1, seed=None)))

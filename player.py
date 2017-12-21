@@ -11,6 +11,8 @@ class player(bot):
         self.hp = 10
         # self.cooldown = 0
 
+        self.eyes = [eye(0, 0, 0, self)]
+
     def update(self, delta):
         super().update(delta)
         self.reload(delta)

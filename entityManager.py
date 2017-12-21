@@ -14,7 +14,6 @@ class entityManager:
         self.mBotsGen = 0
         self.createMBots()
         self.createLBots()
-        # self.createPlayer()
 
 
         # Statistics
