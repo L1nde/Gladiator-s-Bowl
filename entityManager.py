@@ -86,6 +86,7 @@ class entityManager:
         if (bot in self.bots[0]):
             self.killMBot(bot)
         if (bot in self.bots[1]):
+            self.scores[1].append(bot.score)
             bot.reset()
         if (bot in self.bots[2]):
             self.createPlayer()

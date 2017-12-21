@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 
+import os
 from button import *
 
 
@@ -12,8 +13,10 @@ class ui():
         self.font = pygame.font.SysFont('Arial', 16)
         self.em = em
         self.buttons = []
-        self.buttons.append(button(1010, 25, 190, 25, "Show hit plot", self.drawHitPlot))
-        self.buttons.append(button(1010, 60, 190, 25, "Show mbot avg scores", self.drawMBotScorePlot))
+        self.buttons.append(button(1010, 25, 190, 25, "Exit", self.exit, (255, 0, 0)))
+        self.buttons.append(button(1010, 60, 190, 25, "Show hit plot", self.drawHitPlot))
+        self.buttons.append(button(1010, 95, 190, 25, "Show mbot avg scores", self.drawMBotScorePlot))
+        self.buttons.append(button(1010, 130, 190, 25, "Show lbot avg scores", self.drawLBotScorePlot))
         self.buttons.append(button(1010, 200, 190, 25, "Show eyes", self.drawEyes))
         self.buttons.append(button(1010, 235, 190, 25, "Spawn/delete player", self.spawnPlayer))
         self.eyes = False
@@ -52,6 +55,16 @@ class ui():
         plt.plot(xValues, yValues)
         plt.show()
 
+    def drawLBotScorePlot(self):
+        yValues = self.em.scores[1]
+        xValues = []
+        for i in range(len(yValues)):
+            xValues.append(i)
+        plt.plot(xValues, yValues)
+        plt.xlabel('Scores', fontsize=12)
+        plt.ylabel('Bots', fontsize=12)
+        plt.show()
+
     def drawHitPlot(self):
 
         data = self.em.firedHitBulletHistory
@@ -82,3 +95,7 @@ class ui():
             self.em.createPlayer()
         else:
             self.em.bots[2] = []
+
+    def exit(self):
+        pygame.quit()
+        os.sys.exit(0)
