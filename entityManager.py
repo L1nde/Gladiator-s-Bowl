@@ -106,7 +106,7 @@ class entityManager:
 
     def mutateMBots(self):
         parentCount = 10  # must be divisible by 2
-        childrenPerParentPair = 4
+        childrenPerParentPair = 6
         sortedDeadMBots = sorted(self.deadMBots, key=lambda mBot: mBot.score, reverse=True)
         parents = sortedDeadMBots[:parentCount]
         otherBots = sortedDeadMBots[parentCount:]

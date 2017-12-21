@@ -20,7 +20,7 @@ class mBot(bot):
 
     def update(self, delta):
         super().update(delta)
-        outputs = self.brain.getOutputs(self.getInputs(delta))
+        outputs = self.brain.getOutputs(self.getInputs(delta))[0]
         self.speed = outputs[0] * 50
         if (abs(self.speed) < 50):
             self.dealWithBadBehaviour(delta)
@@ -49,7 +49,7 @@ class mBot(bot):
         self.y = newY
         self.currentSelfDestructTime -= delta / 30
         self.reload(delta)
-        if (sigmoid(outputs[2]) > 0.5):
+        if (sigmoid(outputs[2]) > 0):
             self.shoot()
 
         if (self.currentSelfDestructTime <= 0):
@@ -98,17 +98,15 @@ class brain:
     def __init__(self):
         self.model = Sequential()
         self.model.add(
-            Dense(6, activation="tanh", input_dim=1,
+            Dense(8, activation="tanh", input_dim=6,
                   kernel_initializer=initializers.RandomUniform(minval=-1, maxval=1, seed=None)))
-        self.model.add(
-            Dense(8, activation="tanh", kernel_initializer=initializers.RandomUniform(minval=-1, maxval=1, seed=None)))
         self.model.add(
             Dense(3, activation="tanh", kernel_initializer=initializers.RandomUniform(minval=-1, maxval=1, seed=None)))
         self.model.compile(loss='mean_squared_error', optimizer='adam')
 
     def getOutputs(self, inputs):
         inputs.append(1)
-        return np.sum(self.model.predict(inputs), axis=0)
+        return self.model.predict(np.asarray([inputs]))
 
     def mutate(self, brain1, brain2):
         newBrain = []
