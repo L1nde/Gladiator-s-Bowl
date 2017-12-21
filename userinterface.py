@@ -13,7 +13,7 @@ class ui():
         self.em = em
         self.buttons = []
         self.buttons.append(button(1010, 25, 190, 25, "Show hit plot", self.drawHitPlot))
-        self.buttons.append(button(1010, 60, 190, 25, "Show avg scores", self.drawScorePlot))
+        self.buttons.append(button(1010, 60, 190, 25, "Show mbot avg scores", self.drawMBotScorePlot))
         self.buttons.append(button(1010, 200, 190, 25, "Show eyes", self.drawEyes))
         self.eyes = False
 
@@ -42,12 +42,11 @@ class ui():
         w.blit(self.font.render("In pool: " + str(len(self.em.mBotsPool)), False, (0, 0, 0)),
                (self.x0 + x0 + 5, self.y0 + y0 + 40))
 
-
-    def drawScorePlot(self):
+    def drawMBotScorePlot(self):
         yValues = self.em.scores[0]
         xValues = []
         for i in range(len(yValues)):
-            xValues.append((i + 1) * 10)
+            xValues.append(i)
         plt.plot(xValues, yValues)
         plt.show()
 

@@ -1,5 +1,3 @@
-from random import randint
-
 from bullet import bullet
 from lBot import *
 from mBot import *
@@ -23,16 +21,11 @@ class entityManager:
         self.bulletsFired = 0
         self.bulletsHit = 0
         self.firedHitBulletHistory = []
-
-        self.scoreRecordTime = 10
-        self.timeTillRecordTime = self.scoreRecordTime
         self.scores = [[], []]
 
     def update(self, delta):
         self.updateBots(delta)
         self.updateBullets(delta)
-        self.dealWithScores(delta)
-
 
     def draw(self, w):
         self.drawBots(w)
@@ -104,10 +97,12 @@ class entityManager:
         self.deadMBots.append(bot)
         self.bots[0].append(self.mBotsPool.pop(randint(0, len(self.mBotsPool) - 1)))
 
-        if (len(self.deadMBots) + self.maxBotCount >= self.mBotsPoolSize):
+        if (len(self.mBotsPool) == 0):
+            self.scores[0].append(self.getAvgMBotScores())
             self.mutateMBots()
             self.fillMBotsPool()
             self.mBotsGen += 1
+
 
     def mutateMBots(self):
         parentCount = 10  # must be divisible by 2
@@ -117,6 +112,7 @@ class entityManager:
         otherBots = sortedDeadMBots[parentCount:]
         self.deadMBots = []
         for parent in parents:
+            parent.reset()
             self.mBotsPool.append(parent)
 
         for i in range(0, parentCount, 2):
@@ -144,12 +140,6 @@ class entityManager:
         lbots = self.bots[1]
         sortedLBots = sorted(lbots, key=lambda lBot: lBot.score, reverse=True)
         return sortedLBots[0], sortedLBots[1]
-
-    def dealWithScores(self, delta):
-        self.timeTillRecordTime -= delta
-        if (self.timeTillRecordTime < 0):
-            self.scores[0].append(self.getAvgMBotScores())
-            self.timeTillRecordTime = self.scoreRecordTime
 
     def getAvgMBotScores(self):
         s = 0

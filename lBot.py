@@ -1,5 +1,5 @@
-from bot import *
 from random import choice
+
 from keras import initializers
 from keras.layers import Dense
 from keras.models import Sequential
