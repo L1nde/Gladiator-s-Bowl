@@ -4,7 +4,7 @@ class player(bot):
 
     def __init__(self, x, y, entitymanager):
         super().__init__(x, y, entitymanager)
-        self.speed = 1000
+        self.speed = 100
         # self.cooldown = 0
 
     def update(self, delta):
@@ -25,6 +25,6 @@ class player(bot):
             self.shoot()
 
     def draw(self, w):
-        pygame.draw.circle(w, (247, 255, 0), (int(self.x), int(self.y)), 13)
+        pygame.draw.circle(w, (241, 255, 33), (int(self.x), int(self.y)), 13)
         pygame.draw.circle(w, (255, 0, 0),
                            (int(self.x + 8 * cos(self.direction)), int(self.y + 8 * sin(self.direction))), 3)

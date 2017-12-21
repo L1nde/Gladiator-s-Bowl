@@ -10,9 +10,9 @@ from bot import *
 class lBot(bot):
     def __init__(self, x, y, entitymanager):
         super().__init__(x, y, entitymanager)
-        r = randint(0,360)
-        self.direction = radians(180)
-        self.eyes = [eye(200, radians(30), radians(-7.5), self), eye(200, radians(30), radians(7.5), self)]
+        r = randint(-180,180)
+        # self.direction = radians(r)
+        self.eyes = [eye(50, radians(150), radians(0), self), eye(100, radians(100), radians(0), self), eye(200, radians(60), radians(0), self), eye(350, radians(10), radians(0), self)]
         self.brain = Brain()
         self.hunger = 5
 
@@ -21,16 +21,16 @@ class lBot(bot):
         self.reload(delta)
 
         output = self.brain.getOutputs(self.getInput())
-        self.direction = radians(output[0]*360) *delta
-        self.speed = output[1] * 100
+        self.direction = radians(output[0] * 360)
+        self.speed = output[1] *10 * delta
         self.x += self.speed * cos(self.direction) * delta
         self.y += self.speed * sin(self.direction) * delta
         if self.x > 1000 or self.x < 0:
             self.reset()
-            self.score -= 3
+            self.score -= 13
         if self.y > 800 or self.y < 0:
             self.reset()
-            self.score -= 3
+            self.score -= 13
         if output[2] > 0.5:
             self.shoot()
             self.score -= 1
@@ -58,9 +58,9 @@ class lBot(bot):
 class Brain:
     def __init__(self):
         self.model = Sequential()
-        self.model.add(Dense(5, input_dim=1, activation='relu', kernel_initializer=initializers.RandomUniform(minval=-1, maxval=1, seed=None), bias_initializer=initializers.RandomUniform(minval=-10, maxval=10, seed=None)))
-        self.model.add(Dense(12, activation='relu', kernel_initializer=initializers.RandomUniform(minval=-1, maxval=1, seed=None), bias_initializer=initializers.RandomUniform(minval=-10, maxval=10, seed=None)))
-        self.model.add(Dense(3, activation='sigmoid', kernel_initializer=initializers.RandomUniform(minval=-1, maxval=1, seed=None), bias_initializer=initializers.RandomUniform(minval=-10, maxval=10, seed=None)))
+        self.model.add(Dense(5, input_dim=1, kernel_initializer=initializers.RandomUniform(minval=-1, maxval=1, seed=None), bias_initializer=initializers.RandomUniform(minval=-10, maxval=10, seed=None)))
+        self.model.add(Dense(12, kernel_initializer=initializers.RandomUniform(minval=-1, maxval=1, seed=None), bias_initializer=initializers.RandomUniform(minval=-10, maxval=10, seed=None)))
+        self.model.add(Dense(3, activation="tanh", kernel_initializer=initializers.RandomUniform(minval=-1, maxval=1, seed=None), bias_initializer=initializers.RandomUniform(minval=-10, maxval=10, seed=None)))
         self.model.compile(optimizer='sgd', loss='mean_squared_error')
 
     def getOutputs(self, inputs):
@@ -77,7 +77,7 @@ class Brain:
         for i in range(len(fweights1)):
             fweights1[i] = choice([fweights1[i], fweights2[i]])
             if chance > 0.5:
-                fweights1[i] *= chance
+                fweights1[i] = chance
         weights1.reshape(shape)
 
         self.model.set_weights(weights1)

@@ -15,7 +15,9 @@ class ui():
         self.buttons.append(button(1010, 25, 190, 25, "Show hit plot", self.drawHitPlot))
         self.buttons.append(button(1010, 60, 190, 25, "Show mbot avg scores", self.drawMBotScorePlot))
         self.buttons.append(button(1010, 200, 190, 25, "Show eyes", self.drawEyes))
+        self.buttons.append(button(1010, 235, 190, 25, "Spawn/delete player", self.spawnPlayer))
         self.eyes = False
+        self.player = False
 
 
     def draw(self, w):
@@ -70,4 +72,13 @@ class ui():
                 for eye in bot.eyes:
                     eye.draw(w)
 
+    def spawnPlayer(self):
+        self.player = not self.player
+        self.spawningPlayer()
 
+
+    def spawningPlayer(self):
+        if self.player:
+            self.em.createPlayer()
+        else:
+            self.em.bots[2] = []
