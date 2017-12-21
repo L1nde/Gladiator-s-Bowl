@@ -1,18 +1,23 @@
-from bullet import bullet
-from mBot import *
-from lBot import *
-from player import *
 from random import randint
+
+from bullet import bullet
+from lBot import *
+from mBot import *
+from player import *
+
 
 class entityManager:
     def __init__(self):
         self.bulletPool = []
         self.deadBulletPool = []
-        self.maxBotCount = 10
+        self.maxBotCount = 10  # per bot type
         self.bots = [[], [], []]
+        self.mBotsPoolSize = 50
+        self.mBotsGen = 0
         self.createMBots()
         self.createLBots()
         # self.createPlayer()
+
 
         # Statistics
         self.bulletsFired = 0
@@ -48,8 +53,13 @@ class entityManager:
 
 
     def createMBots(self):
-        while len(self.bots[0]) <= self.maxBotCount:
-            self.bots[0].append(mBot(randint(100, 900), randint(100, 700), self))
+        self.deadMBots = []
+        self.mBotsPool = []
+        for i in range(self.mBotsPoolSize):
+            self.mBotsPool.append(mBot(randint(100, 900), randint(100, 700), self))
+        for i in range(self.maxBotCount):
+            self.bots[0].append(self.mBotsPool.pop(randint(0, len(self.mBotsPool) - 1)))
+
 
     def createLBots(self):
         while len(self.bots[1]) <= self.maxBotCount:
@@ -80,17 +90,50 @@ class entityManager:
             for bot in i:
                 bot.draw(w)
 
-    def createNewMBot(self, bot):
-        bot.reset()
-
     def killBot(self, bot):
         if (bot in self.bots[0]):
-            self.createNewMBot(bot)
+            self.killMBot(bot)
         if (bot in self.bots[1]):
             bot.reset()
         if (bot in self.bots[2]):
             self.createPlayer()
             self.bots[2].remove(bot)
+
+    def killMBot(self, bot):
+        self.bots[0].remove(bot)
+        self.deadMBots.append(bot)
+        self.bots[0].append(self.mBotsPool.pop(randint(0, len(self.mBotsPool) - 1)))
+
+        if (len(self.deadMBots) + self.maxBotCount >= self.mBotsPoolSize):
+            self.mutateMBots()
+            self.fillMBotsPool()
+            self.mBotsGen += 1
+
+    def mutateMBots(self):
+        parentCount = 10  # must be divisible by 2
+        childrenPerParentPair = 4
+        sortedDeadMBots = sorted(self.deadMBots, key=lambda mBot: mBot.score, reverse=True)
+        parents = sortedDeadMBots[:parentCount]
+        otherBots = sortedDeadMBots[parentCount:]
+        self.deadMBots = []
+        for parent in parents:
+            self.mBotsPool.append(parent)
+
+        for i in range(0, parentCount, 2):
+            parent1 = parents[i]
+            parent2 = parents[i + 1]
+            for j in range(childrenPerParentPair):
+                if (len(otherBots) == 0):
+                    return
+
+                newBot = sortedDeadMBots.pop()
+                newBot.reset()
+                newBot.brain.mutate(parent1.brain.model, parent2.brain.model)
+                self.mBotsPool.append(newBot)
+
+    def fillMBotsPool(self):
+        while (len(self.mBotsPool) < self.mBotsPoolSize):
+            self.mBotsPool.append(mBot(randint(100, 900), randint(100, 700), self))
 
     def getTwoRandomHighScoreMBots(self):
         mbots = self.bots[0]

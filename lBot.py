@@ -1,11 +1,13 @@
-from bot import *
 from random import choice
+
 from keras import initializers
-from keras.models import Sequential, Input
-from keras.layers import Dense, Activation, Flatten
+from keras.layers import Dense
+from keras.models import Sequential
+
+from bot import *
+
 
 class lBot(bot):
-
     def __init__(self, x, y, entitymanager):
         super().__init__(x, y, entitymanager)
 
@@ -18,7 +20,7 @@ class lBot(bot):
         self.reload(delta)
 
         output = self.brain.getOutputs(self.getInput())
-        self.direction += radians(output[0]*360) *delta
+        self.direction += radians(output[0] * 360) * delta
         self.speed = output[1] * 10
         self.x += self.speed * cos(self.direction) * delta
         self.y += self.speed * sin(self.direction) * delta
@@ -29,19 +31,16 @@ class lBot(bot):
         if output[1] > 0.5:
             self.shoot()
 
-
-
     def reset(self):
         super().reset()
         bot1, bot2 = self.em.getTwoRandomHighScoreLBots()
         self.brain.mutate(bot1.brain, bot2.brain)
 
-
-
     def draw(self, w):
         self.drawEyes(w)
         pygame.draw.circle(w, (129, 255, 129), (int(self.x), int(self.y)), 13)
-        pygame.draw.circle(w, (255, 0, 0), (int(self.x + 8*cos(self.direction)), int(self.y + 8*sin(self.direction))), 3)
+        pygame.draw.circle(w, (255, 0, 0),
+                           (int(self.x + 8 * cos(self.direction)), int(self.y + 8 * sin(self.direction))), 3)
 
     def drawEyes(self, w):
         for eye in self.eyes:
@@ -53,8 +52,8 @@ class lBot(bot):
             inputs.append(eye.canSeeEnemy(self.em.bots))
         return inputs
 
-class Brain:
 
+class Brain:
     def __init__(self):
         self.model = Sequential()
         self.model.add(Dense(12, input_dim=1, activation='relu', kernel_initializer=initializers.RandomUniform(minval=-1, maxval=1, seed=None)))
@@ -73,6 +72,3 @@ class Brain:
                 weights1[i][j] += choice([weights1[i][j], weights2[i][j]])
 
         self.model.set_weights(weights1)
-
-
-

@@ -1,8 +1,8 @@
 import math
 from random import random
 
+from keras.layers import Dense, initializers
 from keras.models import Sequential
-from keras.layers import Dense
 
 from bot import *
 
@@ -11,8 +11,8 @@ class mBot(bot):
     def __init__(self, x, y, entityManager):
         super().__init__(x, y, entityManager)
 
-        self.eyes = [eye(800, radians(3), radians(0), self), eye(400, radians(30), radians(16), self),
-                     eye(400, radians(30), radians(-16), self), ]
+        self.eyes = [eye(800, radians(3), radians(0), self), eye(200, radians(30), radians(16), self),
+                     eye(200, radians(30), radians(-16), self), ]
         self.brain = brain()
         self.selfDestructTime = 10
         self.currentSelfDestructTime = 10
@@ -21,11 +21,11 @@ class mBot(bot):
     def update(self, delta):
         super().update(delta)
         outputs = self.brain.getOutputs(self.getInputs(delta))
-        self.speed = outputs[0] * 100
+        self.speed = outputs[0] * 10
         if (abs(self.speed) < 50):
             self.dealWithBadBehaviour(delta)
 
-        self.direction += outputs[1] * delta * 10
+        self.direction += outputs[1] * delta
 
         self.xSpeed = self.speed * cos(self.direction)
         self.ySpeed = self.speed * sin(self.direction)
@@ -62,15 +62,7 @@ class mBot(bot):
 
     def reset(self):
         super().reset()
-        self.createNewBrain()
         self.currentSelfDestructTime = self.selfDestructTime
-
-    def createNewBrain(self):
-        if (random() < 0.1):
-            self.brain = brain()
-        else:
-            bot1, bot2 = self.em.getTwoRandomHighScoreMBots()
-            self.brain.mutate(bot1.brain.model, bot2.brain.model)
 
     def draw(self, w):
         # self.drawEyes(w)
@@ -106,9 +98,12 @@ class mBot(bot):
 class brain:
     def __init__(self):
         self.model = Sequential()
-        self.model.add(Dense(12, input_dim=1), )
-        self.model.add(Dense(12))
-        self.model.add(Dense(3))
+        self.model.add(
+            Dense(12, input_dim=1, kernel_initializer=initializers.RandomUniform(minval=-1, maxval=1, seed=None)))
+        self.model.add(
+            Dense(12, activation='relu', kernel_initializer=initializers.RandomUniform(minval=-1, maxval=1, seed=None)))
+        self.model.add(Dense(3, activation='sigmoid',
+                             kernel_initializer=initializers.RandomUniform(minval=-1, maxval=1, seed=None)))
         self.model.compile(loss='mean_squared_error', optimizer='sgd')
 
     def getOutputs(self, inputs):
@@ -125,12 +120,11 @@ class brain:
                 w = []
                 for m in range(len(b1weights[0])):
                     r = random()
-                    if (r < 0.45):
+                    if (r < 0.5):
                         w.append(b1weights[n][m] + randint(-120, 120) / 1000)
-                    elif (r > 0.55):
-                        w.append(b2weights[n][m] + randint(-120, 120) / 1000)
                     else:
-                        w.append(self.model.get_weights()[i][n][m])
+                        w.append(b2weights[n][m] + randint(-120, 120) / 1000)
+
                 newWeights.append(w)
             newBrain.append(newWeights)
             newBrain.append(self.model.get_weights()[i + 1])
