@@ -25,13 +25,13 @@ class lBot(bot):
         self.speed = output[1] * 100
         self.x += self.speed * cos(self.direction) * delta
         self.y += self.speed * sin(self.direction) * delta
-        if self.x > 800 or self.x < 0:
+        if self.x > 1000 or self.x < 0:
             self.reset()
             self.score -= 3
         if self.y > 800 or self.y < 0:
             self.reset()
             self.score -= 3
-        if output[1] > 0.5:
+        if output[2] > 0.5:
             self.shoot()
             self.score -= 1
 
@@ -50,9 +50,7 @@ class lBot(bot):
             eye.draw(w)
 
     def getInput(self):
-        inputs = []
-        inputs.append(self.x)
-        inputs.append(self.y)
+        inputs = [self.x, self.y, self.currentCooldown]
         for eye in self.eyes:
             inputs.append(eye.canSeeEnemy(self.em.bots))
         return np.asarray(inputs)
@@ -60,23 +58,26 @@ class lBot(bot):
 class Brain:
     def __init__(self):
         self.model = Sequential()
-        self.model.add(Dense(12, input_dim=1, activation='relu', kernel_initializer=initializers.RandomUniform(minval=-1, maxval=1, seed=None), bias_initializer=initializers.RandomUniform(minval=-10, maxval=10, seed=None)))
-        self.model.add(Dense(8, activation='relu', kernel_initializer=initializers.RandomUniform(minval=-1, maxval=1, seed=None), bias_initializer=initializers.RandomUniform(minval=-10, maxval=10, seed=None)))
-        self.model.add(Dense(2, activation='sigmoid', kernel_initializer=initializers.RandomUniform(minval=-1, maxval=1, seed=None), bias_initializer=initializers.RandomUniform(minval=-10, maxval=10, seed=None)))
+        self.model.add(Dense(5, input_dim=1, activation='relu', kernel_initializer=initializers.RandomUniform(minval=-1, maxval=1, seed=None), bias_initializer=initializers.RandomUniform(minval=-10, maxval=10, seed=None)))
+        self.model.add(Dense(12, activation='relu', kernel_initializer=initializers.RandomUniform(minval=-1, maxval=1, seed=None), bias_initializer=initializers.RandomUniform(minval=-10, maxval=10, seed=None)))
+        self.model.add(Dense(3, activation='sigmoid', kernel_initializer=initializers.RandomUniform(minval=-1, maxval=1, seed=None), bias_initializer=initializers.RandomUniform(minval=-10, maxval=10, seed=None)))
         self.model.compile(optimizer='sgd', loss='mean_squared_error')
 
     def getOutputs(self, inputs):
         return np.sum(self.model.predict(inputs), axis=0)
 
     def breed(self, brain1, brain2):
-        weights1 = brain1.model.get_weights()
-        weights2 = brain2.model.get_weights()
-        chance = randint(-100,100)/100
+        weights1 = np.asarray(brain1.model.get_weights())
+        weights2 = np.asarray(brain2.model.get_weights())
+        shape = np.shape(weights1)
+        fweights1 = weights1.flatten()
+        fweights2 = weights2.flatten()
         r = randint(-350, 350)/1000
-        for i in range(len(weights1)):
-            for j in range(len(weights1[i])):
-                weights1[i][j] = choice([weights1[i][j], weights2[i][j]])
-                if chance > 0.5:
-                    weights1[i][j] = weights1[i][j] * chance
+        chance = randint(-100,100)/100
+        for i in range(len(fweights1)):
+            fweights1[i] = choice([fweights1[i], fweights2[i]])
+            if chance > 0.5:
+                fweights1[i] *= chance
+        weights1.reshape(shape)
 
         self.model.set_weights(weights1)

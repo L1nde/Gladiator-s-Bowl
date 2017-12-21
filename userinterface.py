@@ -14,14 +14,19 @@ class ui():
         self.buttons = []
         self.buttons.append(button(1010, 25, 190, 25, "Show hit plot", self.drawHitPlot))
         self.buttons.append(button(1010, 60, 190, 25, "Show avg scores", self.drawScorePlot))
+        self.buttons.append(button(1010, 200, 190, 25, "Show eyes", self.drawEyes))
+        self.eyes = False
 
 
     def draw(self, w):
+        if self.eyes:
+            self.eyesDrawing(w)
         pygame.draw.rect(w, (200, 200, 200), (self.x0, self.y0, self.x1, self.y1))
         for button in self.buttons:
             button.draw(w)
 
         self.drawMBotsData(w, 5, 600, 190, 195)
+
 
     def update(self, event):
         if (event.type == pygame.MOUSEBUTTONDOWN):
@@ -56,3 +61,14 @@ class ui():
             yValues.append(datum[1] / 100)
         plt.plot(xValues, yValues)
         plt.show()
+
+    def drawEyes(self):
+        self.eyes = not self.eyes
+
+    def eyesDrawing(self, w):
+        for botSet in self.em.bots:
+            for bot in botSet:
+                for eye in bot.eyes:
+                    eye.draw(w)
+
+
