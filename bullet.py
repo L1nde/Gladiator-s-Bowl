@@ -7,7 +7,7 @@ from scipy.spatial import distance
 class bullet:
     def __init__(self):
         self.dead = True
-        self.speed = 800
+        self.speed = 400
 
     def init(self, bot):
         self.xSpeed = cos(bot.direction) * self.speed

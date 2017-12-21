@@ -1,10 +1,14 @@
+from math import atan2
+
 from bot import *
-from math import atan2, degrees, pi
+
+
 class player(bot):
 
     def __init__(self, x, y, entitymanager):
         super().__init__(x, y, entitymanager)
         self.speed = 100
+        self.hp = 10
         # self.cooldown = 0
 
     def update(self, delta):
