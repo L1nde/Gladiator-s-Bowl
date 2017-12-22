@@ -5,6 +5,7 @@ from keras.layers import Dense
 from keras.models import Sequential
 from keras.utils import plot_model
 
+
 from bot import *
 
 
@@ -13,7 +14,8 @@ class lBot(bot):
         super().__init__(x, y, entitymanager)
         r = randint(-180,180)
         # self.direction = radians(r)
-        self.eyes = [eye(350, radians(10), radians(0), self), eye(200, radians(30), radians(10), self), eye(200, radians(30), radians(-10), self)]
+        self.eyes = [eye(350, radians(10), radians(0), self), eye(200, radians(30), radians(10), self), eye(200, radians(30), radians(-10), self)
+            , eye(200, radians(90), radians(40), self), eye(200, radians(30), radians(-40), self)]
         self.brain = Brain()
         self.destructionTime = 15
         self.destruction = self.destructionTime
@@ -58,7 +60,7 @@ class lBot(bot):
             eye.draw(w)
 
     def getInput(self):
-        inputs = [self.x, self.y, self.currentCooldown]
+        inputs = [self.distanceFromCentre(), self.currentCooldown]
         for eye in self.eyes:
             sight = eye.canSeeEnemy(self.em.bots)
             inputs.append(sight)
@@ -66,10 +68,16 @@ class lBot(bot):
             inputs.append(eye.canSeeEnemyBullet(self.em.bulletPool))
         return inputs
 
+    def distanceFromCentre(self):
+        return np.linalg.norm(np.asarray(self.getPos())-np.asarray((500,400)))
+
 class Brain:
     def __init__(self):
         self.model = Sequential()
-        self.model.add(Dense(12, input_dim=9, activation="tanh", kernel_initializer=initializers.RandomUniform(minval=-1, maxval=1, seed=None)))
+        self.model.add(Dense(12, input_dim=12, activation="tanh", kernel_initializer=initializers.RandomUniform(minval=-1, maxval=1, seed=None)))
+
+        self.model.add(Dense(20, activation="tanh", kernel_initializer=initializers.RandomUniform(minval=-1, maxval=1, seed=None)))
+        self.model.add(Dense(20, activation="tanh", kernel_initializer=initializers.RandomUniform(minval=-1, maxval=1, seed=None)))
         self.model.add(Dense(20, activation="tanh", kernel_initializer=initializers.RandomUniform(minval=-1, maxval=1, seed=None)))
         self.model.add(Dense(3, activation="tanh", kernel_initializer=initializers.RandomUniform(minval=-1, maxval=1, seed=None)))
         self.model.compile(optimizer='sgd', loss='mean_squared_error')

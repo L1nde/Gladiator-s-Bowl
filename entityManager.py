@@ -149,7 +149,7 @@ class entityManager:
             s += bot.score
         return s / len(self.bots[0])
 
-    def saveModels(self):
+    def saveModels(self): # TODO add saving extra data like gen number and etc
         lbot1, lbot2 = self.getTwoRandomHighScoreLBots()
         lbot1.brain.model.save("lBot1Model.h5")
         lbot2.brain.model.save("lBot2Model.h5")

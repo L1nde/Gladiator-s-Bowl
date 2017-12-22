@@ -16,7 +16,7 @@ class ui():
         self.buttons.append(button(1010, 25, 190, 25, "Exit", self.exit, (255, 0, 0)))
         self.buttons.append(button(1010, 60, 190, 25, "Show hit plot", self.drawHitPlot))
         self.buttons.append(button(1010, 95, 190, 25, "Show mbot avg scores", self.drawMBotScorePlot))
-        self.buttons.append(button(1010, 130, 190, 25, "Show lbot avg scores", self.drawLBotScorePlot))
+        self.buttons.append(button(1010, 130, 190, 25, "Show lbot last 10 scores", self.drawLBotScorePlot))
         self.buttons.append(button(1010, 200, 190, 25, "Show eyes", self.drawEyes))
         self.buttons.append(button(1010, 235, 190, 25, "Spawn/delete player", self.spawnPlayer))
         self.buttons.append(button(1010, 340, 190, 25, "Save models and weights", self.em.saveModels))
@@ -58,7 +58,11 @@ class ui():
         plt.show()
 
     def drawLBotScorePlot(self):
-        yValues = self.em.scores[1]
+        scores = self.em.scores[1]
+        i = -10
+        if len(scores) < 10:
+            i = -len(scores)
+        yValues = scores[i:]
         xValues = []
         for i in range(len(yValues)):
             xValues.append(i)
