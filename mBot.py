@@ -12,7 +12,7 @@ class mBot(bot):
         super().__init__(x, y, entityManager)
 
         self.eyes = [eye(200, radians(50), radians(20), self), eye(200, radians(50), radians(-20), self),
-                     eye(200, radians(50), radians(60), self), eye(200, radians(50), radians(-60), self)]
+                     eye(100, radians(50), radians(60), self), eye(100, radians(50), radians(-60), self)]
         self.brain = brain()
         self.selfDestructTime = 10
         self.currentSelfDestructTime = 10
