@@ -8,12 +8,12 @@ from bot import *
 
 
 class mBot(bot):
-    def __init__(self, x, y, entityManager):
+    def __init__(self, x, y, entityManager, model):
         super().__init__(x, y, entityManager)
 
         self.eyes = [eye(200, radians(50), radians(20), self), eye(200, radians(50), radians(-20), self),
                      eye(100, radians(50), radians(60), self), eye(100, radians(50), radians(-60), self)]
-        self.brain = brain()
+        self.brain = brain(model)
         self.selfDestructTime = 10
         self.currentSelfDestructTime = 10
 
@@ -95,14 +95,18 @@ class mBot(bot):
 
 # I have no idea what I'm doing
 class brain:
-    def __init__(self):
-        self.model = Sequential()
-        self.model.add(
-            Dense(8, activation="tanh", input_dim=6,
-                  kernel_initializer=initializers.RandomUniform(minval=-1, maxval=1, seed=None)))
-        self.model.add(
-            Dense(3, activation="tanh", kernel_initializer=initializers.RandomUniform(minval=-1, maxval=1, seed=None)))
-        self.model.compile(loss='mean_squared_error', optimizer='adam')
+    def __init__(self, model):
+        if (model == None):
+            self.model = Sequential()
+            self.model.add(
+                Dense(8, activation="tanh", input_dim=6,
+                      kernel_initializer=initializers.RandomUniform(minval=-1, maxval=1, seed=None)))
+            self.model.add(
+                Dense(3, activation="tanh",
+                      kernel_initializer=initializers.RandomUniform(minval=-1, maxval=1, seed=None)))
+            self.model.compile(loss='mean_squared_error', optimizer='adam')
+        else:
+            self.model = model
 
     def getOutputs(self, inputs):
         inputs.append(1)

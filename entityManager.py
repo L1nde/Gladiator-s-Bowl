@@ -1,9 +1,12 @@
+from os import listdir, makedirs
+from os.path import isfile, join, isdir
+
+from keras.models import load_model
+
 from bullet import bullet
 from lBot import *
 from mBot import *
 from player import *
-
-from keras.models import load_model
 
 
 class entityManager:
@@ -12,10 +15,10 @@ class entityManager:
         self.deadBulletPool = []
         self.maxBotCount = 10  # per bot type
         self.bots = [[], [], []]
-        self.mBotsPoolSize = 50
+        self.mBotsPoolSize = 100
         self.mBotsGen = 0
-        self.createMBots()
-        self.createLBots()
+        self.createNewMBots([])
+        self.createLBots([])
 
 
         # Statistics
@@ -45,19 +48,27 @@ class entityManager:
             self.firedHitBulletHistory.append([self.bulletsFired, self.bulletsHit])
             self.bulletsHit = 0
 
-
-    def createMBots(self):
+    def createNewMBots(self, models):
         self.deadMBots = []
         self.mBotsPool = []
+        self.bots[0] = []
         for i in range(self.mBotsPoolSize):
-            self.mBotsPool.append(mBot(randint(100, 900), randint(100, 700), self))
+            if (len(models) > 0):
+                self.mBotsPool.append(
+                    mBot(randint(100, 900), randint(100, 700), self, load_model("data\\mBots\\" + models.pop())))
+            else:
+                self.mBotsPool.append(mBot(randint(100, 900), randint(100, 700), self, None))
         for i in range(self.maxBotCount):
             self.bots[0].append(self.mBotsPool.pop(randint(0, len(self.mBotsPool) - 1)))
 
-
-    def createLBots(self):
+    def createLBots(self, models):
+        self.bots[1] = []
         while len(self.bots[1]) <= self.maxBotCount:
-            self.bots[1].append(lBot(randint(100,900), randint(100,700), self))
+            if (len(models) > 0):
+                self.bots[1].append(
+                    lBot(randint(100, 900), randint(100, 700), self, load_model("data\\lBots\\" + models.pop())))
+            else:
+                self.bots[1].append(lBot(randint(100, 900), randint(100, 700), self, None))
 
     def createPlayer(self):
         self.bots[2].append(player(randint(100,900), randint(100,700), self))
@@ -131,7 +142,7 @@ class entityManager:
 
     def fillMBotsPool(self):
         while (len(self.mBotsPool) < self.mBotsPoolSize):
-            self.mBotsPool.append(mBot(randint(100, 900), randint(100, 700), self))
+            self.mBotsPool.append(mBot(randint(100, 900), randint(100, 700), self, None))
 
     def getTwoRandomHighScoreMBots(self):
         mbots = self.bots[0]
@@ -150,25 +161,38 @@ class entityManager:
         return s / len(self.bots[0])
 
     def saveModels(self): # TODO add saving extra data like gen number and etc
-        lbot1, lbot2 = self.getTwoRandomHighScoreLBots()
-        lbot1.brain.model.save("lBot1Model.h5")
-        lbot2.brain.model.save("lBot2Model.h5")
 
-        mbot1, mbot2 = self.getTwoRandomHighScoreMBots()
-        mbot1.brain.model.save("mBot1Model.h5")
-        mbot2.brain.model.save("mBot2Model.h5")
+        if not isdir("data"):
+            makedirs("data\\lBots")
+            makedirs("data\\mBots")
+
+        self.saveBots(self.bots[1], "lBots", 0)
+        self.saveMBots()
+
+    def saveMBots(self):
+        c = 0
+        c = self.saveBots(self.bots[0], "mBots", c)
+        c = self.saveBots(self.mBotsPool, "mBots", c)
+        c = self.saveBots(self.deadMBots, "mBots", c)
+
+    def saveBots(self, bots, targetDir, counter):
+        for bot in bots:
+            bot.brain.model.save("data\\" + targetDir + "\\" + "bot" + str(counter) + ".h5")
+            counter += 1
+        return counter
 
     def loadModels(self):
-        lmodel1 = load_model("lBot1Model.h5")
-        lmodel2 = load_model("lBot2Model.h5")
+        self.loadLBots()
+        self.loadMBots()
 
-        mmodel1 = load_model("mBot1Model.h5")
-        mmodel2 = load_model("mBot2Model.h5")
+    def loadLBots(self):
+        files = getFileNamesFromDir("data\\lBots")
+        self.createLBots(files)
 
-        for lbot in self.bots[1]:
-            lbot.brain.model = choice([lmodel1, lmodel2])
-
-        for mbot in self.bots[0]:
-            mbot.brain.model = choice([mmodel1, mmodel2])
+    def loadMBots(self):
+        files = getFileNamesFromDir("data\\mBots")
+        self.createNewMBots(files)
 
 
+def getFileNamesFromDir(path):
+    return [f for f in listdir(path) if isfile(join(path, f))]
