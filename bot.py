@@ -1,8 +1,7 @@
-from math import radians, cos, sin
+from math import radians, cos, sin, sqrt
 from random import randint
 
 import pygame
-from scipy.spatial import distance
 from theano.gradient import np
 
 
@@ -97,7 +96,7 @@ class eye:
         return False
 
     def isInRange(self, targetPos):
-        if self.range > distance.euclidean(self.bot.getPos(), targetPos):
+        if self.range > sqrt((self.bot.x - targetPos[0]) ** 2 + (self.bot.y - targetPos[1]) ** 2):
             return True
         return False
 
