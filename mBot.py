@@ -95,7 +95,7 @@ class mBot(bot):
             inputs.append(0)
             inputs.append(0)
         else:
-            distFromBullet = sqrt((self.x - closestBullet[0]) ** 2 + (self.y - closestBullet[1]) ** 2)
+            distFromBullet = math.sqrt((self.x - closestBullet[0]) ** 2 + (self.y - closestBullet[1]) ** 2)
             if (distFromBullet <= 200):
                 inputs.append(1 - distFromBullet / 200)
                 targetVector = np.subtract(closestBullet, self.getPos())
