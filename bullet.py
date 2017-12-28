@@ -40,5 +40,5 @@ class bullet:
                         bot.hp -= 1
                         bot.score -= 2
                         self.bot.em.bulletsHit += 1
-                        self.bot.score += 10
+                        self.bot.rewardForHit()
                         self.dead = True

@@ -11,8 +11,8 @@ class mBot(bot):
     def __init__(self, x, y, entityManager, model):
         super().__init__(x, y, entityManager)
 
-        self.eyes = [eye(200, radians(50), radians(20), self), eye(200, radians(50), radians(-20), self),
-                     eye(100, radians(50), radians(60), self), eye(100, radians(50), radians(-60), self)]
+        self.eyes = [eye(400, radians(10), radians(4), self), eye(400, radians(10), radians(-4), self)]
+        self.radar = radar(self)
         self.brain = brain(model)
         self.selfDestructTime = 10
         self.currentSelfDestructTime = 10
@@ -21,10 +21,10 @@ class mBot(bot):
     def update(self, delta):
         super().update(delta)
         outputs = self.brain.getOutputs(self.getInputs(delta))[0]
-        self.speed = outputs[0] * 50
+        self.speed = outputs[0] * 200
         if (abs(self.speed) < 50):
             self.dealWithBadBehaviour(delta)
-        self.direction += outputs[1] * delta
+        self.direction += outputs[1] * delta * 3
 
         self.xSpeed = self.speed * cos(self.direction)
         self.ySpeed = self.speed * sin(self.direction)
@@ -75,22 +75,45 @@ class mBot(bot):
 
     def getInputs(self, delta):
         inputs = []
+
+        # eyes
+        c = 0
         for i in self.eyes:
-            sight = i.canSeeEnemy(self.em.bots)
-            if (sight == 1):
-                self.score += delta
+            if (c < 2):
+                sight = i.canSeeEnemy(self.em.bots)
+                if (sight == 1):
+                    self.score += delta
+            else:
+                sight = i.canSeeEnemyBullet(self.em.bulletPool)
+
             inputs.append(sight)
+            c += 1
 
-        # inputs.append(sigmoid(self.getDistanceFromCentre() / 500) * 2 - 1)
+        # Radar
+        closestBullet = self.radar.getClosestBullet(self.em.bulletPool)
+        if closestBullet is None:
+            inputs.append(0)
+            inputs.append(0)
+        else:
+            distFromBullet = sqrt((self.x - closestBullet[0]) ** 2 + (self.y - closestBullet[1]) ** 2)
+            if (distFromBullet <= 200):
+                inputs.append(1 - distFromBullet / 200)
+                targetVector = np.subtract(closestBullet, self.getPos())
+                dirUnitVector = (sin(self.direction), cos(self.direction))
+                if np.dot(targetVector, dirUnitVector) < 0:
+                    inputs.append(-1)
+                else:
+                    inputs.append(1)
+            else:
+                inputs.append(0)
+                inputs.append(0)
 
+        #Other
         if (self.currentCooldown <= 0):
             inputs.append(1)
         else:
             inputs.append(0)
         return inputs
-
-    def getDistanceFromCentre(self):
-        return distance.euclidean(self.getPos(), (500, 400))
 
 
 # I have no idea what I'm doing

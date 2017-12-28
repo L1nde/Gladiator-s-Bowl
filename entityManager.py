@@ -13,13 +13,12 @@ class entityManager:
     def __init__(self):
         self.bulletPool = []
         self.deadBulletPool = []
-        self.maxBotCount = 10  # per bot type
+        self.maxBotCount = 5  # per bot type
         self.bots = [[], [], []]
-        self.mBotsPoolSize = 100
+        self.mBotsPoolSize = 50
         self.mBotsGen = 0
         self.createNewMBots([])
         self.createLBots([])
-
 
         # Statistics
         self.bulletsFired = 0
@@ -63,7 +62,7 @@ class entityManager:
 
     def createLBots(self, models):
         self.bots[1] = []
-        while len(self.bots[1]) <= self.maxBotCount:
+        while len(self.bots[1]) < self.maxBotCount:
             if (len(models) > 0):
                 self.bots[1].append(
                     lBot(randint(100, 900), randint(100, 700), self, load_model("data\\lBots\\" + models.pop())))
@@ -119,7 +118,7 @@ class entityManager:
 
     def mutateMBots(self):
         parentCount = 10  # must be divisible by 2
-        childrenPerParentPair = 6
+        childrenPerParentPair = 8
         sortedDeadMBots = sorted(self.deadMBots, key=lambda mBot: mBot.score, reverse=True)
         parents = sortedDeadMBots[:parentCount]
         otherBots = sortedDeadMBots[parentCount:]

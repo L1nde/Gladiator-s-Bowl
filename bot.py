@@ -1,4 +1,4 @@
-from math import radians, cos, sin, sqrt
+from math import radians, cos, sin
 from random import randint
 
 import pygame
@@ -49,6 +49,9 @@ class bot:
     def getDirection(self):
         return self.direction
 
+    def rewardForHit(self):
+        self.score += 10
+
 
 class eye:
     def __init__(self, range, spread, direction, bot):
@@ -96,7 +99,7 @@ class eye:
         return False
 
     def isInRange(self, targetPos):
-        if self.range > sqrt((self.bot.x - targetPos[0]) ** 2 + (self.bot.y - targetPos[1]) ** 2):
+        if self.range ** 2 > (self.bot.x - targetPos[0]) ** 2 + (self.bot.y - targetPos[1]) ** 2:
             return True
         return False
 
@@ -107,3 +110,33 @@ class eye:
                                         sin(dir + self.spread / 2) * self.range + self.bot.y), self.bot.getPos())
         pygame.draw.line(w, col, (cos(dir - self.spread / 2) * self.range + self.bot.x,
                                   sin(dir - self.spread / 2) * self.range + self.bot.y), self.bot.getPos())
+
+
+# returns to closest bot/bullet pos
+class radar:
+    def __init__(self, bot):
+        self.bot = bot
+
+    def getBulletLocs(self, bullet):
+        p = []
+        for b in bullet:
+            p.append(b.getPos())
+        return np.asarray(p)
+
+    def getBotLocs(self, bots):
+        p = []
+        for b in bots:
+            p.append(b.getPos())
+        return np.asarray(p)
+
+    def getClosestBullet(self, bullets):
+        return self.findClosest(self.getBulletLocs(bullets))
+
+    def getClosestBot(self, bots):
+        return self.findClosest(self.getBotLocs(bots))
+
+    def findClosest(self, targets):
+        if (len(targets) == 0):
+            return None
+        dist_2 = np.sum((targets - np.asarray(self.bot.getPos())) ** 2, axis=1)
+        return targets[np.argmin(dist_2)]
