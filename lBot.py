@@ -12,41 +12,46 @@ class lBot(bot):
         super().__init__(x, y, entitymanager)
         r = randint(-180,180)
         # self.direction = radians(r)
-        self.eyes = [eye(350, radians(10), radians(0), self), eye(200, radians(30), radians(10), self), eye(200, radians(30), radians(-10), self)
-            , eye(200, radians(90), radians(40), self), eye(200, radians(30), radians(-40), self)]
+        self.eyes = [eye(500, radians(10), radians(2.5), self), eye(500, radians(10), radians(-2.5), self)]
         self.brain = Brain(model)
-        self.destructionTime = 15
-        self.destruction = self.destructionTime
+        self.baseAge = 15
+        self.age = self.baseAge
 
     def update(self, delta):
         super().update(delta)
         self.reload(delta)
-        self.destruction -= delta
+        self.age -= delta
 
         output = self.brain.getOutputs(self.getInput())[0]
         self.direction += radians(output[0] * 180) * delta
-        self.speed = output[1] * 50
+        self.speed = output[1] * 200
+        if abs(self.speed) < 50:
+            self.score -= delta
         self.x += self.speed * cos(self.direction) * delta
         self.y += self.speed * sin(self.direction) * delta
         if self.x > 1000 or self.x < 0:
-            self.reset()
             self.score -= 13
+            self.age -= self.baseAge
         if self.y > 800 or self.y < 0:
-            self.reset()
             self.score -= 13
+            self.age -= self.baseAge
         if output[2] > 0:
             self.shoot()
-            self.score -= 1
 
-        if self.destruction < 0:
-            self.reset()
+        if self.age < 0:
+            self.em.killBot(self)
 
     def reset(self):
         super().reset()
-        self.destruction = self.destructionTime
-        bot1, bot2 = self.em.getTwoRandomHighScoreLBots()
+        self.age = self.baseAge
         # plot_model(bot1.brain.model, to_file="model.png")
-        self.brain.breed(bot1.brain, bot2.brain)
+        parents = self.em.getRandomLParents()
+        self.brain.breed(parents[0].brain, parents[1].brain)
+
+    def shoot(self):
+        if super().shoot():
+            self.score -= 1
+
 
     def draw(self, w):
         # self.drawEyes(w)
@@ -58,11 +63,11 @@ class lBot(bot):
             eye.draw(w)
 
     def getInput(self):
-        inputs = [self.distanceFromCentre(), self.currentCooldown]
+        inputs = [1 if self.currentCooldown == 0 else 0, sigmoid(self.distanceFromCentre())]
         for eye in self.eyes:
             sight = eye.canSeeEnemy(self.em.bots)
             inputs.append(sight)
-            self.score += sight/20
+            self.score += sight/10
             inputs.append(eye.canSeeEnemyBullet(self.em.bulletPool))
         return inputs
 
@@ -73,15 +78,15 @@ class Brain:
     def __init__(self, model):
         if (model == None):
             self.model = Sequential()
-            self.model.add(Dense(12, input_dim=12, activation="tanh",
+            self.model.add(Dense(12, input_dim=6, activation="tanh",
                                  kernel_initializer=initializers.RandomUniform(minval=-1, maxval=1, seed=None)))
 
-            self.model.add(Dense(20, activation="tanh",
-                                 kernel_initializer=initializers.RandomUniform(minval=-1, maxval=1, seed=None)))
-            self.model.add(Dense(20, activation="tanh",
-                                 kernel_initializer=initializers.RandomUniform(minval=-1, maxval=1, seed=None)))
-            self.model.add(Dense(20, activation="tanh",
-                                 kernel_initializer=initializers.RandomUniform(minval=-1, maxval=1, seed=None)))
+            # self.model.add(Dense(20, activation="tanh",
+            #                      kernel_initializer=initializers.RandomUniform(minval=-1, maxval=1, seed=None)))
+            # self.model.add(Dense(20, activation="tanh",
+            #                      kernel_initializer=initializers.RandomUniform(minval=-1, maxval=1, seed=None)))
+            # self.model.add(Dense(20, activation="tanh",
+            #                      kernel_initializer=initializers.RandomUniform(minval=-1, maxval=1, seed=None)))
             self.model.add(Dense(3, activation="tanh",
                                  kernel_initializer=initializers.RandomUniform(minval=-1, maxval=1, seed=None)))
             self.model.compile(optimizer='sgd', loss='mean_squared_error')
@@ -102,7 +107,8 @@ class Brain:
                 for k in range(len(b1weights[0])):
                     r = random()
                     if r > 0.8:
-                        w.append(randint(-1000, 1000)/1000)
+                        genome = choice([b1weights[j][k], b2weights[j][k]])
+                        w.append(genome + randint(-100, 100)/1000)
                     else:
                         w.append(choice([b1weights[j][k], b2weights[j][k]]))
                 newWeights.append(w)

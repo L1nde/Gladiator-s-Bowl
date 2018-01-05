@@ -18,6 +18,11 @@ class entityManager:
         self.mBotsPoolSize = 50
         self.mBotsGen = 0
         self.createNewMBots([])
+
+        self.lBotsPoolsize = 50
+        self.lBotsPool = []
+        self.deadLBots = []
+        self.lBotsGen = 0
         self.createLBots([])
 
         # Statistics
@@ -61,13 +66,19 @@ class entityManager:
             self.bots[0].append(self.mBotsPool.pop(randint(0, len(self.mBotsPool) - 1)))
 
     def createLBots(self, models):
+        self.deadLBots = []
+        self.lBotsPool = []
         self.bots[1] = []
-        while len(self.bots[1]) < self.maxBotCount:
-            if (len(models) > 0):
-                self.bots[1].append(
+        while len(self.lBotsPool) < self.lBotsPoolsize:
+            if len(models) > 0:
+                self.lBotsPool.append(
                     lBot(randint(100, 900), randint(100, 700), self, load_model("data\\lBots\\" + models.pop())))
             else:
-                self.bots[1].append(lBot(randint(100, 900), randint(100, 700), self, None))
+                self.lBotsPool.append(lBot(randint(100, 900), randint(100, 700), self, None))
+
+        for i in range(self.maxBotCount):
+            self.bots[1].append(self.lBotsPool.pop(i))
+
 
     def createPlayer(self):
         self.bots[2].append(player(randint(100,900), randint(100,700), self))
@@ -98,11 +109,24 @@ class entityManager:
         if (bot in self.bots[0]):
             self.killMBot(bot)
         if (bot in self.bots[1]):
-            self.scores[1].append(bot.score)
-            bot.reset()
+            self.killLBot(bot)
         if (bot in self.bots[2]):
             self.createPlayer()
             self.bots[2].remove(bot)
+
+    def killLBot(self, bot):
+        self.scores[1].append(bot.score)
+        self.bots[1].remove(bot)
+        self.deadLBots.append(bot)
+        self.bots[1].append(self.lBotsPool.pop(randint(0, len(self.lBotsPool) - 1)))
+
+        if len(self.lBotsPool) == 0:
+            self.lBotsGen += 1
+            self.lBotsPool = list(self.deadLBots)
+            self.deadLBots = []
+            for bot in self.lBotsPool:
+                bot.reset()
+
 
     def killMBot(self, bot):
         self.bots[0].remove(bot)
@@ -148,10 +172,17 @@ class entityManager:
         sortedMBots = sorted(mbots, key=lambda mBot: mBot.score, reverse=True)
         return sortedMBots[0], sortedMBots[1]
 
-    def getTwoRandomHighScoreLBots(self):
-        lbots = self.bots[1]
-        sortedLBots = sorted(lbots, key=lambda lBot: lBot.score, reverse=True)
-        return sortedLBots[0], sortedLBots[1]
+    def getRandomLParents(self):
+        good = 8
+        bad = 2
+        sortedLBots = np.asarray(sorted(self.lBotsPool, key=lambda lBot: lBot.score, reverse=True))
+        sortedScores = np.asarray([x.score for x in sortedLBots])
+        indexes = np.append(np.arange(0, good), np.arange(-bad, 0))
+        probapilities0to1 = (sortedScores - sortedScores.min())/np.ptp(sortedScores)
+        probapilities = probapilities0to1[indexes] / probapilities0to1[indexes].sum()
+        selection = sortedLBots[indexes]
+        selectionScores = probapilities[indexes]
+        return np.random.choice(selection, 2, p=selectionScores)
 
     def getAvgMBotScores(self):
         s = 0
@@ -165,7 +196,7 @@ class entityManager:
             makedirs("data\\lBots")
             makedirs("data\\mBots")
 
-        self.saveBots(self.bots[1], "lBots", 0)
+        self.saveLBots()
         self.saveMBots()
 
     def saveMBots(self):
@@ -173,6 +204,12 @@ class entityManager:
         c = self.saveBots(self.bots[0], "mBots", c)
         c = self.saveBots(self.mBotsPool, "mBots", c)
         c = self.saveBots(self.deadMBots, "mBots", c)
+
+    def saveLBots(self):
+        c = 0
+        c = self.saveBots(self.bots[1], "lBots", c)
+        c = self.saveBots(self.lBotsPool, "lBots", c)
+        c = self.saveBots(self.deadLBots, "lBots", c)
 
     def saveBots(self, bots, targetDir, counter):
         for bot in bots:

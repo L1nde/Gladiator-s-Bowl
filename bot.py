@@ -1,4 +1,4 @@
-from math import radians, cos, sin
+from math import radians, cos, sin, exp
 from random import randint
 
 import pygame
@@ -30,6 +30,7 @@ class bot:
     def update(self, delta):
         if self.hp <= 0:
             self.em.killBot(self)
+            return
 
     def draw(self, w):
         pygame.draw.circle(w, (0, 0, 255), (self.x, self.y), self.radius)
@@ -42,6 +43,8 @@ class bot:
         if (self.currentCooldown <= 0):
             self.em.createBullet(self)
             self.currentCooldown = self.cooldown
+            return True
+        return False
 
     def getPos(self):
         return (self.x, self.y)
@@ -140,3 +143,6 @@ class radar:
             return None
         dist_2 = np.sum((targets - np.asarray(self.bot.getPos())) ** 2, axis=1)
         return targets[np.argmin(dist_2)]
+
+def sigmoid(x):
+    return 1 / (1 + exp(-x))

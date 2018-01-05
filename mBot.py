@@ -161,5 +161,4 @@ class brain:
             newBrain.append(self.model.get_weights()[i + 1])
         self.model.set_weights(newBrain)
 
-def sigmoid(x):
-    return 1 / (1 + math.exp(-x))
+
