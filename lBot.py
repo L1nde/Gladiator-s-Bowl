@@ -108,7 +108,7 @@ class Brain:
                     r = random()
                     if r > 0.8:
                         genome = choice([b1weights[j][k], b2weights[j][k]])
-                        w.append(genome + randint(-100, 100)/1000)
+                        w.append(genome + randint(-200, 200)/1000)
                     else:
                         w.append(choice([b1weights[j][k], b2weights[j][k]]))
                 newWeights.append(w)
